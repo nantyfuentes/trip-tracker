@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spain & Italy Trip Expenses</title>
+<style>
+  :root {
+    --bg: #faf8f5;
+    --card: #ffffff;
+    --text: #1f2320;
+    --muted: #6b6f6c;
+    --accent: #c0603e;
+    --accent-2: #4c7a6f;
+    --border: #e6e1da;
+    --radius: 14px;
+    --danger: #b3452f;
+    --warn: #c98a2c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17181a;
+      --card: #212327;
+      --text: #ecebe8;
+      --muted: #9a9d99;
+      --border: #33353a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  body {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+  h1 { font-size: 1.4rem; margin: 4px 0 2px; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+    margin-top: 12px;
+  }
+  label:first-of-type { margin-top: 0; }
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+  }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  button {
+    margin-top: 16px;
+    width: 100%;
+    padding: 13px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+  }
+  button:active { opacity: 0.85; }
+  .totals { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+  .totals .big { font-size: 1.7rem; font-weight: 700; color: var(--accent-2); }
+  .by-category { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .pill b { color: var(--text); }
+  .filter-pill {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    flex: none;
+  }
+  .filter-pill.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+  }
+  .entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .entry:last-child { border-bottom: none; }
+  .entry-main { min-width: 0; }
+  .entry-desc {
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .entry-meta { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .entry-amount { font-weight: 700; white-space: nowrap; }
+  .entry-del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    width: auto;
+    margin: 0;
+    padding: 4px 6px;
+    cursor: pointer;
+  }
+  .day-header {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin: 18px 0 4px;
+  }
+  .empty { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 0.9rem; }
+  .status { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 10px; }
+  .who { display: flex; gap: 8px; margin-top: 12px; }
+  .who button {
+    margin-top: 0;
+    flex: 1;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-weight: 500;
+    padding: 9px;
+  }
+  .who button.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Budget card */
+  .budget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .budget-edit-link {
+    background: none;
+    border: none;
+    color: var(--accent-2);
+    font-size: 0.78rem;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .budget-numbers {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .budget-bar-track {
+    margin-top: 8px;
+    height: 10px;
+    border-radius: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .budget-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: var(--accent-2);
+    transition: width 0.3s ease;
+  }
+  .budget-bar-fill.warn { background: var(--warn); }
+  .budget-bar-fill.danger { background: var(--danger); }
+  .budget-set-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .budget-set-row input { flex: 1; }
+  .budget-set-row button { margin-top: 0; width: auto; padding: 10px 16px; }
+</style>
+</head>
+<body>
+
+  <h1>&#127991; Spain & Italy Expenses</h1>
+  <div class="subtitle">Shared trip tracker &mdash; logged by both of you, synced automatically</div>
+
+  <div class="card" id="budgetCard">
+    <div class="budget-header">
+      <div style="font-size:0.78rem;color:var(--muted)">Trip budget</div>
+      <button class="budget-edit-link" id="editBudgetBtn" type="button">Edit</button>
+    </div>
+    <div id="budgetDisplay"></div>
+    <div class="budget-set-row" id="budgetSetRow" style="display:none">
+      <input id="budgetInput" type="number" inputmode="decimal" step="1" min="0" placeholder="Total budget in USD" />
+      <button id="saveBudgetBtn" type="button">Save</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="totals">
+      <div>
+        <div style="font-size:0.78rem;color:var(--muted)">Total spent</div>
+        <div class="big" id="totalUSD">$0.00</div>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--muted)">&asymp; EUR</div>
+        <div id="totalEUR" style="font-weight:600">&euro;0.00</div>
+      </div>
+    </div>
+    <div class="by-category" id="byCategory"></div>
+  </div>
+
+  <div class="card">
+    <label>Who's logging this?</label>
+    <div class="who" id="whoButtons">
+      <button type="button" data-who="H">H</button>
+      <button type="button" data-who="Consu">Consu</button>
+    </div>
+
+    <label for="desc">Description</label>
+    <input id="desc" type="text" placeholder="e.g. Dinner in Barrio G&oacute;tico" />
+
+    <div class="row">
+      <div>
+        <label for="city">City</label>
+        <select id="city">
+          <option>Barcelona</option>
+          <option>Florence</option>
+          <option>Rome</option>
+          <option>Spain</option>
+        </select>
+      </div>
+      <div>
+        <label for="entryDate">Date</label>
+        <input id="entryDate" type="date" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="category">Category</label>
+        <select id="category">
+          <option>Food & Drink</option>
+          <option>Lodging</option>
+          <option>Transport</option>
+          <option>Activities</option>
+          <option>Tours</option>
+          <option>Shopping</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label for="currency">Currency</label>
+        <select id="currency">
+          <option value="EUR">EUR (&euro;)</option>
+          <option value="USD">USD ($)</option>
+          <option value="GBP">GBP (&pound;)</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="amount">Amount</label>
+    <input id="amount" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
+
+    <button id="addBtn" type="button">Add expense</button>
+  </div>
+
+  <div class="card" id="listCard">
+    <div class="filter-row" id="cityFilterRow"></div>
+    <div id="list"></div>
+  </div>
+
+  <div class="status" id="status">Connecting&hellip;</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, deleteDoc, doc, setDoc,
+      onSnapshot, query, orderBy, limit
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnpVJIvqM9Zlg5lD0r0q_OrwUF1_fLlRw",
+      authDomain: "trip-expenses-84a37.firebaseapp.com",
+      projectId: "trip-expenses-84a37",
+      storageBucket: "trip-expenses-84a37.firebasestorage.app",
+      messagingSenderId: "905831476267",
+      appId: "1:905831476267:web:cef25ab52b5ac8abc3ce6e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const expensesCol = collection(db, "expenses");
+    const budgetDocRef = doc(db, "meta", "budget");
+
+    const listEl = document.getElementById('list');
+    const totalUSDel = document.getElementById('totalUSD');
+    const totalEURel = document.getElementById('totalEUR');
+    const byCategoryEl = document.getElementById('byCategory');
+    const statusEl = document.getElementById('status');
+    const whoButtons = document.querySelectorAll('#whoButtons button');
+    const cityFilterRow = document.getElementById('cityFilterRow');
+    const budgetDisplay = document.getElementById('budgetDisplay');
+    const budgetSetRow = document.getElementById('budgetSetRow');
+    const budgetInput = document.getElementById('budgetInput');
+    const editBudgetBtn = document.getElementById('editBudgetBtn');
+    const saveBudgetBtn = document.getElementById('saveBudgetBtn');
+
+    const EUR_TO_USD = 1.08;
+    const GBP_TO_USD = 1.27;
+    const CITIES = ['Barcelona', 'Florence', 'Rome', 'Spain'];
+
+    let selectedWho = null;
+    let selectedCityFilter = 'All';
+    let latestEntries = [];
+    let currentBudget = 0;
+
+    // default the date field to today
+    document.getElementById('entryDate').value = new Date().toISOString().slice(0, 10);
+
+    whoButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedWho = btn.dataset.who;
+        whoButtons.forEach(b => b.classList.toggle('active', b === btn));
+      });
+    });
+
+    function toUSD(amount, currency) {
+      if (currency === 'EUR') return amount * EUR_TO_USD;
+      if (currency === 'GBP') return amount * GBP_TO_USD;
+      return amount;
+    }
+
+    function fmtMoney(n, cur) {
+      const symbol = cur === 'USD' ? '$' : (cur === 'GBP' ? '\u00A3' : '\u20AC');
+      return symbol + Number(n).toFixed(2);
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function buildCityFilters() {
+      cityFilterRow.innerHTML = '';
+      const options = ['All', ...CITIES];
+      options.forEach(city => {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'filter-pill' + (city === selectedCityFilter ? ' active' : '');
+        pill.textContent = city;
+        pill.addEventListener('click', () => {
+          selectedCityFilter = city;
+          render(latestEntries);
+        });
+        cityFilterRow.appendChild(pill);
+      });
+    }
+
+    function renderBudget(spentUSD) {
+      if (!currentBudget || currentBudget <= 0) {
+        budgetDisplay.innerHTML = '<div style="font-size:0.85rem;color:var(--muted);margin-top:4px">No budget set yet.</div>';
+        return;
+      }
+      const remaining = currentBudget - spentUSD;
+      const pct = Math.min(100, Math.max(0, (spentUSD / currentBudget) * 100));
+      let barClass = '';
+      if (spentUSD > currentBudget) barClass = 'danger';
+      else if (pct >= 80) barClass = 'warn';
+
+      budgetDisplay.innerHTML = `
+        <div class="budget-numbers">
+          <span>${fmtMoney(spentUSD, 'USD')} spent of ${fmtMoney(currentBudget, 'USD')}</span>
+          <span style="color:${remaining < 0 ? 'var(--danger)' : 'var(--muted)'}">${remaining < 0 ? 'Over by ' + fmtMoney(Math.abs(remaining), 'USD') : fmtMoney(remaining, 'USD') + ' left'}</span>
+        </div>
+        <div class="budget-bar-track">
+          <div class="budget-bar-fill ${barClass}" style="width:${pct}%"></div>
+        </div>
+      `;
+    }
+
+    function render(entries) {
+      latestEntries = entries;
+
+      const filtered = selectedCityFilter === 'All'
+        ? entries
+        : entries.filter(e => (e.city || '') === selectedCityFilter);
+
+      // totals always reflect the current filter
+      let totalUSD_val = 0;
+      const byCat = {};
+      filtered.forEach(e => {
+        const usd = toUSD(e.amount, e.currency || 'EUR');
+        totalUSD_val += usd;
+        byCat[e.category] = (byCat[e.category] || 0) + usd;
+      });
+      totalUSDel.textContent = fmtMoney(totalUSD_val, 'USD');
+      totalEURel.textContent = fmtMoney(totalUSD_val / EUR_TO_USD, 'EUR');
+
+      renderBudget(totalUSD_val);
+
+      byCategoryEl.innerHTML = '';
+      Object.entries(byCat)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([cat, val]) => {
+          const pill = document.createElement('div');
+          pill.className = 'pill';
+          pill.innerHTML = `${cat}: <b>${fmtMoney(val, 'USD')}</b>`;
+          byCategoryEl.appendChild(pill);
+        });
+
+      buildCityFilters();
+
+      // sort by the expense's own date (descending), tie-break by creation time
+      const sorted = [...filtered].sort((a, b) => {
+        const dateCompare = (b.date || '').localeCompare(a.date || '');
+        if (dateCompare !== 0) return dateCompare;
+        return (b.ts || 0) - (a.ts || 0);
+      });
+
+      listEl.innerHTML = '';
+      if (sorted.length === 0) {
+        listEl.innerHTML = '<div class="empty">No expenses logged yet for this view.</div>';
+        return;
+      }
+
+      let lastDay = null;
+      sorted.forEach(e => {
+        const dateStr = e.date || new Date(e.ts || Date.now()).toISOString().slice(0, 10);
+        const dateObj = new Date(dateStr + 'T12:00:00');
+        const dayKey = dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        if (dayKey !== lastDay) {
+          const h = document.createElement('div');
+          h.className = 'day-header';
+          h.textContent = dayKey;
+          listEl.appendChild(h);
+          lastDay = dayKey;
+        }
+        const row = document.createElement('div');
+        row.className = 'entry';
+        const metaParts = [e.category || '', e.city || '', e.who || ''].filter(Boolean);
+        row.innerHTML = `
+          <div class="entry-main">
+            <div class="entry-desc">${escapeHtml(e.description || '(no description)')}</div>
+            <div class="entry-meta">${escapeHtml(metaParts.join(' &middot; '))}</div>
+          </div>
+          <div class="entry-amount">${fmtMoney(e.amount, e.currency || 'EUR')}</div>
+          <button class="entry-del" title="Delete" data-id="${e.id}">&#10005;</button>
+        `;
+        listEl.appendChild(row);
+      });
+
+      listEl.querySelectorAll('.entry-del').forEach(btn => {
+        btn.addEventListener('click', () => deleteEntry(btn.dataset.id));
+      });
+    }
+
+    async function deleteEntry(id) {
+      try {
+        await deleteDoc(doc(db, "expenses", id));
+      } catch (err) {
+        console.error('delete failed', err);
+        alert('Could not delete \u2014 check your connection and try again.');
+      }
+    }
+
+    // Live subscription to expenses
+    const q = query(expensesCol, orderBy('ts', 'desc'), limit(1000));
+    onSnapshot(q,
+      (snap) => {
+        statusEl.textContent = 'Synced \u2014 live';
+        const entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        render(entries);
+      },
+      (err) => {
+        console.error('snapshot error', err);
+        statusEl.textContent = 'Connection issue \u2014 check your Firebase config and internet connection';
+      }
+    );
+
+    // Live subscription to shared budget
+    onSnapshot(budgetDocRef,
+      (snap) => {
+        currentBudget = snap.exists() ? (snap.data().amount || 0) : 0;
+        render(latestEntries);
+      },
+      (err) => {
+        console.error('budget snapshot error', err);
+      }
+    );
+
+    editBudgetBtn.addEventListener('click', () => {
+      budgetInput.value = currentBudget || '';
+      budgetSetRow.style.display = budgetSetRow.style.display === 'none' ? 'flex' : 'none';
+      if (budgetSetRow.style.display === 'flex') budgetInput.focus();
+    });
+
+    saveBudgetBtn.addEventListener('click', async () => {
+      const val = parseFloat(budgetInput.value);
+      if (isNaN(val) || val < 0) { alert('Enter a valid budget amount.'); return; }
+      try {
+        await setDoc(budgetDocRef, { amount: val, currency: 'USD' });
+        budgetSetRow.style.display = 'none';
+      } catch (err) {
+        console.error('budget save failed', err);
+        alert('Could not save budget \u2014 check your connection and try again.');
+      }
+    });
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+      const desc = document.getElementById('desc').value.trim();
+      const city = document.getElementById('city').value;
+      const entryDate = document.getElementById('entryDate').value;
+      const category = document.getElementById('category').value;
+      const currency = document.getElementById('currency').value;
+      const amountRaw = document.getElementById('amount').value;
+      const amount = parseFloat(amountRaw);
+
+      if (!desc) { alert('Add a short description.'); return; }
+      if (isNaN(amount) || amount <= 0) { alert('Enter a valid amount.'); return; }
+      if (!entryDate) { alert('Pick a date.'); return; }
+
+      const entry = {
+        description: desc,
+        category,
+        currency,
+        amount,
+        who: selectedWho || null,
+        city,
+        date: entryDate,
+        ts: Date.now()
+      };
+
+      try {
+        await addDoc(expensesCol, entry);
+      } catch (err) {
+        console.error('add failed', err);
+        alert('Could not save \u2014 check your connection and try again.');
+        return;
+      }
+
+      document.getElementById('desc').value = '';
+      document.getElementById('amount').value = '';
+      document.getElementById('desc').focus();
+    });
+  </script>
+</body>
+</html>
