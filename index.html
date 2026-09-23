@@ -83,7 +83,7 @@
     -webkit-appearance: none;
     appearance: none;
   }
-  .row { display: flex; gap: 10px; }
+  .row { display: flex; gap: 10px; margin-top: 12px; }
   .row > div { flex: 1; min-width: 0; }
 
   button {
@@ -290,13 +290,14 @@
 
     <div class="row">
       <div>
-        <label for="city">City</label>
+        <label for="city">Location</label>
         <select id="city">
           <option>Pre-Trip</option>
           <option>Barcelona</option>
           <option>Florence</option>
           <option>Rome</option>
           <option>Spain</option>
+          <option>Post-Trip</option>
         </select>
       </div>
       <div>
@@ -315,6 +316,7 @@
           <option>Activities</option>
           <option>Tours</option>
           <option>Shopping</option>
+          <option>Insurance</option>
           <option>Other</option>
         </select>
       </div>
@@ -323,7 +325,6 @@
         <select id="currency">
           <option value="EUR">EUR (&euro;)</option>
           <option value="USD">USD ($)</option>
-          <option value="GBP">GBP (&pound;)</option>
         </select>
       </div>
     </div>
@@ -372,8 +373,7 @@
     const cityFilterRow = document.getElementById('cityFilterRow');
 
     const EUR_TO_USD = 1.14;
-    const GBP_TO_USD = 1.27;
-    const CITIES = ['Pre-Trip', 'Barcelona', 'Florence', 'Rome', 'Spain'];
+    const CITIES = ['Pre-Trip', 'Barcelona', 'Florence', 'Rome', 'Spain', 'Post-Trip'];
 
     let selectedWho = null;
     let selectedCityFilter = 'All';
@@ -421,12 +421,11 @@
 
     function toUSD(amount, currency) {
       if (currency === 'EUR') return amount * EUR_TO_USD;
-      if (currency === 'GBP') return amount * GBP_TO_USD;
       return amount;
     }
 
     function fmtMoney(n, cur) {
-      const symbol = cur === 'USD' ? '$' : (cur === 'GBP' ? '\u00A3' : '\u20AC');
+      const symbol = cur === 'USD' ? '$' : '\u20AC';
       return symbol + Number(n).toFixed(2);
     }
 
