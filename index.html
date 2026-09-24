@@ -36,7 +36,7 @@
     margin: 0 auto;
     padding: 20px 16px 60px;
   }
-  h1 { font-size: 1.4rem; margin: 4px 0 2px; }
+  h1 { font-size: 1.4rem; margin: 4px 0 18px; }
   .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; }
   .card {
     background: var(--card);
@@ -239,7 +239,6 @@
 <body>
 
   <h1>&#127991; Spain & Italy Expenses</h1>
-  <div class="subtitle">Shared trip tracker &mdash; logged by both of you, synced automatically</div>
 
   <div class="tab-nav">
     <button type="button" class="tab-btn active" id="tabTrackerBtn">Tracker</button>
@@ -296,7 +295,7 @@
           <option>Barcelona</option>
           <option>Florence</option>
           <option>Rome</option>
-          <option>Spain</option>
+          <option>Madrid</option>
           <option>Post-Trip</option>
         </select>
       </div>
@@ -373,7 +372,7 @@
     const cityFilterRow = document.getElementById('cityFilterRow');
 
     const EUR_TO_USD = 1.14;
-    const CITIES = ['Pre-Trip', 'Barcelona', 'Florence', 'Rome', 'Spain', 'Post-Trip'];
+    const CITIES = ['Pre-Trip', 'Barcelona', 'Florence', 'Rome', 'Madrid', 'Post-Trip'];
 
     let selectedWho = null;
     let selectedCityFilter = 'All';
@@ -419,6 +418,24 @@
       });
     });
 
+    // Pressing Enter moves through the typed fields in order (dropdowns are
+    // skipped since iOS Safari won't visibly focus a <select> via script);
+    // Enter on the last field (amount) submits the expense.
+    const fieldOrder = ['desc', 'entryDate', 'amount'];
+    fieldOrder.forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.addEventListener('keydown', (ev) => {
+        if (ev.key !== 'Enter' && ev.keyCode !== 13) return;
+        ev.preventDefault();
+        const nextId = fieldOrder[i + 1];
+        if (nextId) {
+          document.getElementById(nextId).focus();
+        } else {
+          document.getElementById('addBtn').click();
+        }
+      });
+    });
+
     function toUSD(amount, currency) {
       if (currency === 'EUR') return amount * EUR_TO_USD;
       return amount;
@@ -426,7 +443,8 @@
 
     function fmtMoney(n, cur) {
       const symbol = cur === 'USD' ? '$' : '\u20AC';
-      return symbol + Number(n).toFixed(2);
+      const formatted = Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return symbol + formatted;
     }
 
     function escapeHtml(str) {
@@ -510,7 +528,7 @@
         row.innerHTML = `
           <div class="entry-main">
             <div class="entry-desc">${escapeHtml(e.description || '(no description)')}</div>
-            <div class="entry-meta">${escapeHtml(metaParts.join(' &middot; '))}</div>
+            <div class="entry-meta">${escapeHtml(metaParts.join(' \u00B7 '))}</div>
           </div>
           <div class="entry-amount">${fmtMoney(e.amount, e.currency || 'EUR')}</div>
           <button class="entry-del" title="Delete" data-id="${e.id}">&#10005;</button>
