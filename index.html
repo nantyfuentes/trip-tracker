@@ -198,7 +198,7 @@
     padding: 9px;
     height: 44px;
   }
-  .who button.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .who button.active { background: var(--accent-2); color: white; border-color: var(--accent-2); }
 
   .tab-nav {
     display: flex;
@@ -216,9 +216,9 @@
     padding: 10px;
   }
   .tab-btn.active {
-    background: var(--accent);
+    background: var(--accent-2);
     color: white;
-    border-color: var(--accent);
+    border-color: var(--accent-2);
   }
   .converter-big {
     font-size: 2rem;
@@ -242,6 +242,47 @@
     color: var(--muted);
     font-size: 0.78rem;
     margin-top: 14px;
+  }
+
+  .entry-desc { cursor: pointer; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+  }
+  .modal-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px 16px 20px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .modal-header h2 { font-size: 1.1rem; margin: 0; }
+  .modal-close {
+    width: auto;
+    margin: 0;
+    padding: 4px 8px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
   }
 </style>
 </head>
@@ -350,12 +391,76 @@
 
   </div><!-- /trackerView -->
 
+  <div class="modal-overlay" id="editOverlay" style="display:none">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Edit expense</h2>
+        <button type="button" class="modal-close" id="editCloseBtn" aria-label="Close">&#10005;</button>
+      </div>
+
+      <label>Who's logging this?</label>
+      <div class="who" id="editWhoButtons">
+        <button type="button" data-who="H">H</button>
+        <button type="button" data-who="Consu">Consu</button>
+      </div>
+
+      <label for="editDesc">Description</label>
+      <input id="editDesc" type="text" />
+
+      <div class="row">
+        <div>
+          <label for="editCity">Location</label>
+          <select id="editCity">
+            <option>Pre-Trip</option>
+            <option>Barcelona</option>
+            <option>Florence</option>
+            <option>Rome</option>
+            <option>Madrid</option>
+            <option>Post-Trip</option>
+          </select>
+        </div>
+        <div>
+          <label for="editDate">Date</label>
+          <input id="editDate" type="date" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="editCategory">Category</label>
+          <select id="editCategory">
+            <option>Food & Drink</option>
+            <option>Lodging</option>
+            <option>Transport</option>
+            <option>Activities</option>
+            <option>Tours</option>
+            <option>Shopping</option>
+            <option>Insurance</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="editCurrency">Currency</label>
+          <select id="editCurrency">
+            <option value="EUR">EUR (&euro;)</option>
+            <option value="USD">USD ($)</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="editAmount">Amount</label>
+      <input id="editAmount" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
+
+      <button id="applyEditBtn" type="button">Apply changes</button>
+    </div>
+  </div>
+
   <div class="status" id="status">Connecting&hellip;</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, deleteDoc, doc,
+      getFirestore, collection, addDoc, deleteDoc, updateDoc, doc,
       onSnapshot, query, orderBy, limit
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
@@ -472,8 +577,12 @@
         pill.className = 'filter-pill' + (city === selectedCityFilter ? ' active' : '');
         pill.textContent = city;
         pill.addEventListener('click', () => {
+          const beforeTop = cityFilterRow.getBoundingClientRect().top;
           selectedCityFilter = city;
           render(latestEntries);
+          const afterTop = cityFilterRow.getBoundingClientRect().top;
+          const delta = afterTop - beforeTop;
+          if (delta !== 0) window.scrollBy(0, delta);
         });
         cityFilterRow.appendChild(pill);
       });
@@ -537,7 +646,7 @@
         const metaParts = [e.category || '', e.city || '', e.who || ''].filter(Boolean);
         row.innerHTML = `
           <div class="entry-main">
-            <div class="entry-desc">${escapeHtml(e.description || '(no description)')}</div>
+            <div class="entry-desc" data-id="${e.id}">${escapeHtml(e.description || '(no description)')}</div>
             <div class="entry-meta">${escapeHtml(metaParts.join(' \u00B7 '))}</div>
           </div>
           <div class="entry-amount">${fmtMoney(e.amount, e.currency || 'EUR')}</div>
@@ -549,6 +658,9 @@
       listEl.querySelectorAll('.entry-del').forEach(btn => {
         btn.addEventListener('click', () => deleteEntry(btn.dataset.id));
       });
+      listEl.querySelectorAll('.entry-desc').forEach(el => {
+        el.addEventListener('click', () => openEditModal(el.dataset.id));
+      });
     }
 
     async function deleteEntry(id) {
@@ -559,6 +671,81 @@
         alert('Could not delete \u2014 check your connection and try again.');
       }
     }
+
+    // ---- Edit modal ----
+    const editOverlay = document.getElementById('editOverlay');
+    const editWhoButtons = document.querySelectorAll('#editWhoButtons button');
+    let editingId = null;
+    let editingWho = null;
+
+    function openEditModal(id) {
+      const entry = latestEntries.find(e => e.id === id);
+      if (!entry) return;
+
+      editingId = id;
+      editingWho = entry.who || null;
+
+      document.getElementById('editDesc').value = entry.description || '';
+      document.getElementById('editCity').value = entry.city || 'Pre-Trip';
+      document.getElementById('editDate').value = entry.date || '';
+      document.getElementById('editCategory').value = entry.category || 'Other';
+      document.getElementById('editCurrency').value = entry.currency || 'EUR';
+      document.getElementById('editAmount').value = entry.amount != null ? entry.amount : '';
+
+      editWhoButtons.forEach(b => b.classList.toggle('active', b.dataset.who === editingWho));
+
+      editOverlay.style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      editOverlay.style.display = 'none';
+      editingId = null;
+    }
+
+    editWhoButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        editingWho = btn.dataset.who;
+        editWhoButtons.forEach(b => b.classList.toggle('active', b === btn));
+      });
+    });
+
+    document.getElementById('editCloseBtn').addEventListener('click', closeEditModal);
+    editOverlay.addEventListener('click', (ev) => {
+      if (ev.target === editOverlay) closeEditModal();
+    });
+
+    document.getElementById('applyEditBtn').addEventListener('click', async () => {
+      if (!editingId) return;
+
+      const desc = document.getElementById('editDesc').value.trim();
+      const city = document.getElementById('editCity').value;
+      const entryDate = document.getElementById('editDate').value;
+      const category = document.getElementById('editCategory').value;
+      const currency = document.getElementById('editCurrency').value;
+      const amount = parseFloat(document.getElementById('editAmount').value);
+
+      if (!desc) { alert('Add a short description.'); return; }
+      if (isNaN(amount) || amount <= 0) { alert('Enter a valid amount.'); return; }
+      if (!entryDate) { alert('Pick a date.'); return; }
+
+      try {
+        await updateDoc(doc(db, "expenses", editingId), {
+          description: desc,
+          city,
+          date: entryDate,
+          category,
+          currency,
+          amount,
+          who: editingWho || null
+        });
+      } catch (err) {
+        console.error('update failed', err);
+        alert('Could not save changes \u2014 check your connection and try again.');
+        return;
+      }
+
+      closeEditModal();
+    });
 
     const q = query(expensesCol, orderBy('ts', 'desc'), limit(1000));
     onSnapshot(q,
