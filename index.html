@@ -284,6 +284,58 @@
     line-height: 1;
     cursor: pointer;
   }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) translateY(16px) scale(0.96);
+    background: var(--accent-2);
+    color: white;
+    padding: 11px 20px;
+    border-radius: 24px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 2000;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  .toast .toast-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+  .toast .toast-check svg {
+    width: 11px;
+    height: 11px;
+    stroke: white;
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 16;
+    stroke-dashoffset: 16;
+  }
+  .toast.show .toast-check svg {
+    animation: toastCheck 0.35s ease 0.1s forwards;
+  }
+  @keyframes toastCheck {
+    to { stroke-dashoffset: 0; }
+  }
 </style>
 </head>
 <body>
@@ -362,6 +414,7 @@
           <option>Food & Drink</option>
           <option>Lodging</option>
           <option>Transport</option>
+          <option>Flight</option>
           <option>Activities</option>
           <option>Tours</option>
           <option>Shopping</option>
@@ -432,6 +485,7 @@
             <option>Food & Drink</option>
             <option>Lodging</option>
             <option>Transport</option>
+            <option>Flight</option>
             <option>Activities</option>
             <option>Tours</option>
             <option>Shopping</option>
@@ -456,6 +510,11 @@
   </div>
 
   <div class="status" id="status">Connecting&hellip;</div>
+
+  <div class="toast" id="toast">
+    <span class="toast-check"><svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg></span>
+    <span id="toastMsg">Expense added</span>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -760,6 +819,18 @@
       }
     );
 
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.remove('show');
+      // force reflow so the checkmark animation restarts on repeated taps
+      void t.offsetWidth;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+    }
+
     document.getElementById('addBtn').addEventListener('click', async () => {
       const desc = document.getElementById('desc').value.trim();
       const city = document.getElementById('city').value;
@@ -797,6 +868,7 @@
       if (document.activeElement && document.activeElement.blur) {
         document.activeElement.blur();
       }
+      showToast('Expense added');
     });
   </script>
 </body>
