@@ -39,10 +39,11 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
+  html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+  }
   body {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 20px 16px 60px;
+    min-height: 100vh;
   }
   h1 { font-size: 1.4rem; margin: 4px 0 18px; }
   .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; }
@@ -194,7 +195,6 @@
     margin: 18px 0 4px;
   }
   .empty { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 0.9rem; }
-  .status { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 10px; }
   .who { display: flex; gap: 8px; margin-top: 12px; }
   .who button {
     margin-top: 0;
@@ -208,26 +208,151 @@
   }
   .who button.active { background: var(--accent-2); color: white; border-color: var(--accent-2); }
 
-  .tab-nav {
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sync-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--muted);
+    flex: none;
+  }
+  .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9a9d99;
+    flex: none;
+  }
+  .sync-dot.online { background: var(--accent-2); }
+  .sync-dot.offline { background: var(--accent); }
+
+  .app-shell { display: flex; }
+
+  .tab-nav {
+    position: fixed;
+    left: 10%;
+    right: 10%;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    z-index: 50;
+    display: flex;
+    justify-content: space-around;
+    gap: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), 0 2px 10px rgba(0, 0, 0, 0.10);
   }
   .tab-btn {
-    width: auto;
     flex: 1;
-    margin-top: 0;
-    background: var(--card);
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
     color: var(--muted);
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 8px 4px;
+    margin: 0;
+    border-radius: 16px;
+    cursor: pointer;
+  }
+  .tab-btn.active { color: var(--accent-2); background: rgba(76, 122, 111, 0.14); }
+  .tab-icon { width: 21px; height: 21px; }
+
+  .content-area {
+    flex: 1;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 16px 16px calc(104px + env(safe-area-inset-bottom, 0px));
+  }
+  .tab-view { display: none; }
+  .tab-view.active { display: block; }
+
+  @media (min-width: 860px) {
+    .topbar { padding-left: 252px; }
+    .tab-nav {
+      left: 0;
+      right: auto;
+      top: 0;
+      bottom: 0;
+      transform: none;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+      border: none;
+      border-right: 1px solid var(--border);
+      border-radius: 0;
+      box-shadow: none;
+      padding: calc(20px + env(safe-area-inset-top, 0px)) 12px 20px;
+      gap: 4px;
+    }
+    .tab-btn {
+      width: auto;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 12px;
+      font-size: 0.85rem;
+      padding: 11px 14px;
+      border-radius: 10px;
+    }
+    .tab-icon { width: 19px; height: 19px; }
+    .content-area {
+      margin-left: 220px;
+      padding: 24px 24px 40px;
+    }
+  }
+
+  .secondary-btn {
+    margin-top: 0;
+    width: 100%;
+    height: 46px;
+    background: var(--bg);
+    color: var(--text);
     border: 1px solid var(--border);
     font-weight: 600;
-    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
   }
-  .tab-btn.active {
-    background: var(--accent-2);
-    color: white;
-    border-color: var(--accent-2);
-  }
+  .detail-summary { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+
+  .chart-header { font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
+  .donut-wrap { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .donut { width: 120px; height: 120px; flex: none; }
+  .donut-legend { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .legend-label { flex: 1; color: var(--text); }
+  .legend-value { color: var(--muted); white-space: nowrap; }
+  .line-chart { width: 100%; height: 140px; display: block; }
+  .chart-empty { text-align: center; color: var(--muted); padding: 20px 10px; font-size: 0.85rem; }
   .converter-big {
     font-size: 2rem;
     font-weight: 700;
@@ -348,109 +473,175 @@
 </head>
 <body>
 
-  <h1>&#127991; Spain & Italy Expenses</h1>
-
-  <div class="tab-nav">
-    <button type="button" class="tab-btn active" id="tabTrackerBtn">Tracker</button>
-    <button type="button" class="tab-btn" id="tabConverterBtn">Converter</button>
-  </div>
-
-  <div id="converterView" style="display:none">
-    <div class="card">
-      <label for="convEUR">Amount in EUR</label>
-      <div class="converter-row">
-        <span class="curr-label">&euro; EUR</span>
-        <input id="convEUR" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
-      </div>
-      <label for="convUSD">Amount in USD</label>
-      <div class="converter-row">
-        <span class="curr-label">$ USD</span>
-        <input id="convUSD" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
-      </div>
-      <div class="converter-rate-note">Using a rough rate of &euro;1 &asymp; $1.14</div>
+  <header class="topbar">
+    <div class="topbar-title">&#127991; Spain &amp; Italy Expenses</div>
+    <div class="sync-indicator">
+      <span class="sync-dot" id="statusDot"></span>
+      <span id="statusText">Connecting&hellip;</span>
     </div>
-  </div>
+  </header>
 
-  <div id="trackerView">
+  <div class="app-shell">
 
-  <div class="card">
-    <div class="totals">
-      <div>
-        <div style="font-size:0.78rem;color:var(--muted)">Total spent</div>
-        <div class="big" id="totalUSD">$0.00</div>
-      </div>
-      <div>
-        <div style="font-size:0.78rem;color:var(--muted)">&asymp; EUR</div>
-        <div id="totalEUR" style="font-weight:600">&euro;0.00</div>
-      </div>
-    </div>
-    <div class="by-category" id="byCategory"></div>
-  </div>
+    <nav class="tab-nav" id="tabNav" aria-label="Sections">
+      <button type="button" class="tab-btn active" data-tab="add">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Add</span>
+      </button>
+      <button type="button" class="tab-btn" data-tab="detail">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        <span>Detail</span>
+      </button>
+      <button type="button" class="tab-btn" data-tab="summary">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        <span>Summary</span>
+      </button>
+      <button type="button" class="tab-btn" data-tab="converter">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <span>Converter</span>
+      </button>
+    </nav>
 
-  <div class="card">
-    <label>Who's logging this?</label>
-    <div class="who" id="whoButtons">
-      <button type="button" data-who="H">H</button>
-      <button type="button" data-who="Consu">Consu</button>
-    </div>
+    <main class="content-area">
 
-    <label for="desc">Description</label>
-    <input id="desc" type="text" placeholder="e.g. Dinner in Barrio G&oacute;tico" />
+      <section id="addView" class="tab-view active">
+        <div class="card">
+          <label>Who's logging this?</label>
+          <div class="who" id="whoButtons">
+            <button type="button" data-who="H">H</button>
+            <button type="button" data-who="Consu">Consu</button>
+          </div>
 
-    <div class="row">
-      <div>
-        <label for="city">Location</label>
-        <select id="city">
-          <option>Pre-Trip</option>
-          <option>Barcelona</option>
-          <option>Florence</option>
-          <option>Rome</option>
-          <option>Madrid</option>
-          <option>Post-Trip</option>
-        </select>
-      </div>
-      <div>
-        <label for="entryDate">Date</label>
-        <input id="entryDate" type="date" />
-      </div>
-    </div>
+          <label for="desc">Description</label>
+          <input id="desc" type="text" placeholder="e.g. Dinner in Barrio G&oacute;tico" />
 
-    <div class="row">
-      <div>
-        <label for="category">Category</label>
-        <select id="category">
-          <option>Food & Drink</option>
-          <option>Lodging</option>
-          <option>Transport</option>
-          <option>Flight</option>
-          <option>Activities</option>
-          <option>Tours</option>
-          <option>Shopping</option>
-          <option>Insurance</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div>
-        <label for="currency">Currency</label>
-        <select id="currency">
-          <option value="EUR">EUR (&euro;)</option>
-          <option value="USD">USD ($)</option>
-        </select>
-      </div>
-    </div>
+          <div class="row">
+            <div>
+              <label for="city">Location</label>
+              <select id="city">
+                <option>Pre-Trip</option>
+                <option>Barcelona</option>
+                <option>Florence</option>
+                <option>Rome</option>
+                <option>Madrid</option>
+                <option>Post-Trip</option>
+              </select>
+            </div>
+            <div>
+              <label for="entryDate">Date</label>
+              <input id="entryDate" type="date" />
+            </div>
+          </div>
 
-    <label for="amount">Amount</label>
-    <input id="amount" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
+          <div class="row">
+            <div>
+              <label for="category">Category</label>
+              <select id="category">
+                <option>Food & Drink</option>
+                <option>Lodging</option>
+                <option>Transport</option>
+                <option>Flight</option>
+                <option>Activities</option>
+                <option>Tours</option>
+                <option>Shopping</option>
+                <option>Insurance</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="currency">Currency</label>
+              <select id="currency">
+                <option value="EUR">EUR (&euro;)</option>
+                <option value="USD">USD ($)</option>
+              </select>
+            </div>
+          </div>
 
-    <button id="addBtn" type="button">Add expense</button>
-  </div>
+          <label for="amount">Amount</label>
+          <input id="amount" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
 
-  <div class="card" id="listCard">
-    <div class="filter-row" id="cityFilterRow"></div>
-    <div id="list"></div>
-  </div>
+          <button id="addBtn" type="button">Add expense</button>
+        </div>
+      </section>
 
-  </div><!-- /trackerView -->
+      <section id="detailView" class="tab-view">
+        <div class="card filters-card">
+          <label>Location</label>
+          <div class="filter-row" id="cityFilterRow"></div>
+          <div class="row">
+            <div>
+              <label for="categoryFilter">Category</label>
+              <select id="categoryFilter"></select>
+            </div>
+            <div>
+              <label for="dateFromFilter">From</label>
+              <input id="dateFromFilter" type="date" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="dateToFilter">To</label>
+              <input id="dateToFilter" type="date" />
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button type="button" class="secondary-btn" id="clearFiltersBtn">Clear filters</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="listCard">
+          <div class="detail-summary" id="detailSummaryLine"></div>
+          <div id="list"></div>
+        </div>
+      </section>
+
+      <section id="summaryView" class="tab-view">
+        <div class="card">
+          <div class="totals">
+            <div>
+              <div style="font-size:0.78rem;color:var(--muted)">Total spent</div>
+              <div class="big" id="totalUSD">$0.00</div>
+            </div>
+            <div>
+              <div style="font-size:0.78rem;color:var(--muted)">&asymp; EUR</div>
+              <div id="totalEUR" style="font-weight:600">&euro;0.00</div>
+            </div>
+          </div>
+          <div class="by-category" id="byCategory"></div>
+        </div>
+
+        <div class="card">
+          <div class="chart-header">Share by category</div>
+          <div class="donut-wrap">
+            <svg id="donutChart" class="donut" viewBox="0 0 42 42"></svg>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="chart-header">Daily spending</div>
+          <svg id="lineChart" class="line-chart" viewBox="0 0 300 140" preserveAspectRatio="none"></svg>
+        </div>
+      </section>
+
+      <section id="converterView" class="tab-view">
+        <div class="card">
+          <label for="convEUR">Amount in EUR</label>
+          <div class="converter-row">
+            <span class="curr-label">&euro; EUR</span>
+            <input id="convEUR" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
+          </div>
+          <label for="convUSD">Amount in USD</label>
+          <div class="converter-row">
+            <span class="curr-label">$ USD</span>
+            <input id="convUSD" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
+          </div>
+          <div class="converter-rate-note">Using a rough rate of &euro;1 &asymp; $1.14</div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /app-shell -->
 
   <div class="modal-overlay" id="editOverlay" style="display:none">
     <div class="modal-card">
@@ -517,8 +708,6 @@
     </div>
   </div>
 
-  <div class="status" id="status">Connecting&hellip;</div>
-
   <div class="toast" id="toast">
     <span class="toast-check"><svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg></span>
     <span id="toastMsg">Expense added</span>
@@ -548,36 +737,61 @@
     const totalUSDel = document.getElementById('totalUSD');
     const totalEURel = document.getElementById('totalEUR');
     const byCategoryEl = document.getElementById('byCategory');
-    const statusEl = document.getElementById('status');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
     const whoButtons = document.querySelectorAll('#whoButtons button');
     const cityFilterRow = document.getElementById('cityFilterRow');
+    const categoryFilterEl = document.getElementById('categoryFilter');
+    const dateFromFilterEl = document.getElementById('dateFromFilter');
+    const dateToFilterEl = document.getElementById('dateToFilter');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    const detailSummaryLine = document.getElementById('detailSummaryLine');
+    const donutChartEl = document.getElementById('donutChart');
+    const donutLegendEl = document.getElementById('donutLegend');
+    const lineChartEl = document.getElementById('lineChart');
 
     const EUR_TO_USD = 1.14;
     const CITIES = ['Pre-Trip', 'Barcelona', 'Florence', 'Rome', 'Madrid', 'Post-Trip'];
+    const CATEGORIES = ['Food & Drink', 'Lodging', 'Transport', 'Flight', 'Activities', 'Tours', 'Shopping', 'Insurance', 'Other'];
+    const CATEGORY_COLORS = {
+      'Food & Drink': '#c0603e',
+      'Lodging': '#4c7a6f',
+      'Transport': '#5b7fa6',
+      'Flight': '#8a6bbd',
+      'Activities': '#d9a441',
+      'Tours': '#a45c7a',
+      'Shopping': '#7d8f5a',
+      'Insurance': '#b98b56',
+      'Other': '#6b6f6c'
+    };
 
     let selectedWho = null;
     let selectedCityFilter = 'All';
+    let selectedCategoryFilter = 'All';
+    let dateFromFilter = '';
+    let dateToFilter = '';
     let latestEntries = [];
 
     document.getElementById('entryDate').value = new Date().toISOString().slice(0, 10);
 
-    // Tab switching
-    const tabTrackerBtn = document.getElementById('tabTrackerBtn');
-    const tabConverterBtn = document.getElementById('tabConverterBtn');
-    const trackerView = document.getElementById('trackerView');
-    const converterView = document.getElementById('converterView');
+    categoryFilterEl.innerHTML = '<option value="All">All categories</option>' +
+      CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('');
 
-    tabTrackerBtn.addEventListener('click', () => {
-      tabTrackerBtn.classList.add('active');
-      tabConverterBtn.classList.remove('active');
-      trackerView.style.display = '';
-      converterView.style.display = 'none';
-    });
-    tabConverterBtn.addEventListener('click', () => {
-      tabConverterBtn.classList.add('active');
-      tabTrackerBtn.classList.remove('active');
-      converterView.style.display = '';
-      trackerView.style.display = 'none';
+    // Tab navigation (bottom bar on mobile, sidebar on wider screens)
+    const tabButtons = document.querySelectorAll('#tabNav .tab-btn');
+    const tabViews = {
+      add: document.getElementById('addView'),
+      detail: document.getElementById('detailView'),
+      summary: document.getElementById('summaryView'),
+      converter: document.getElementById('converterView')
+    };
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        tabButtons.forEach(b => b.classList.toggle('active', b === btn));
+        Object.entries(tabViews).forEach(([key, el]) => el.classList.toggle('active', key === target));
+        window.scrollTo({ top: 0 });
+      });
     });
 
     // Live two-way EUR <-> USD converter
@@ -646,7 +860,7 @@
         pill.addEventListener('click', () => {
           const beforeTop = cityFilterRow.getBoundingClientRect().top;
           selectedCityFilter = city;
-          render(latestEntries);
+          renderDetail(latestEntries);
           const afterTop = cityFilterRow.getBoundingClientRect().top;
           const delta = afterTop - beforeTop;
           if (delta !== 0) window.scrollBy(0, delta);
@@ -655,34 +869,27 @@
       });
     }
 
-    function render(entries) {
-      latestEntries = entries;
-
-      const filtered = selectedCityFilter === 'All'
-        ? entries
-        : entries.filter(e => (e.city || '') === selectedCityFilter);
-
-      let totalUSD_val = 0;
-      const byCat = {};
-      filtered.forEach(e => {
-        const usd = toUSD(e.amount, e.currency || 'EUR');
-        totalUSD_val += usd;
-        byCat[e.category] = (byCat[e.category] || 0) + usd;
+    function getDetailFiltered(entries) {
+      return entries.filter(e => {
+        if (selectedCityFilter !== 'All' && (e.city || '') !== selectedCityFilter) return false;
+        if (selectedCategoryFilter !== 'All' && (e.category || '') !== selectedCategoryFilter) return false;
+        if (dateFromFilter && (e.date || '') < dateFromFilter) return false;
+        if (dateToFilter && (e.date || '') > dateToFilter) return false;
+        return true;
       });
-      totalUSDel.textContent = fmtMoney(totalUSD_val, 'USD');
-      totalEURel.textContent = fmtMoney(totalUSD_val / EUR_TO_USD, 'EUR');
+    }
 
-      byCategoryEl.innerHTML = '';
-      Object.entries(byCat)
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([cat, val]) => {
-          const pill = document.createElement('div');
-          pill.className = 'pill';
-          pill.innerHTML = `${cat}: <b>${fmtMoney(val, 'USD')}</b>`;
-          byCategoryEl.appendChild(pill);
-        });
-
+    function renderDetail(entries) {
       buildCityFilters();
+
+      const filtered = getDetailFiltered(entries);
+
+      let filteredTotalUSD = 0;
+      filtered.forEach(e => { filteredTotalUSD += toUSD(e.amount, e.currency || 'EUR'); });
+      const filtersActive = selectedCityFilter !== 'All' || selectedCategoryFilter !== 'All' || dateFromFilter || dateToFilter;
+      detailSummaryLine.textContent = filtered.length
+        ? `${filtered.length} expense${filtered.length === 1 ? '' : 's'} \u00B7 ${fmtMoney(filteredTotalUSD, 'USD')}${filtersActive ? ' (filtered)' : ''}`
+        : '';
 
       const sorted = [...filtered].sort((a, b) => {
         const dateCompare = (b.date || '').localeCompare(a.date || '');
@@ -692,7 +899,9 @@
 
       listEl.innerHTML = '';
       if (sorted.length === 0) {
-        listEl.innerHTML = '<div class="empty">No expenses logged yet for this view.</div>';
+        listEl.innerHTML = entries.length === 0
+          ? '<div class="empty">No expenses logged yet.</div>'
+          : '<div class="empty">No expenses match these filters.</div>';
         return;
       }
 
@@ -729,6 +938,131 @@
         el.addEventListener('click', () => openEditModal(el.dataset.id));
       });
     }
+
+    function renderDonut(byCat, total) {
+      donutChartEl.innerHTML = '';
+      donutLegendEl.innerHTML = '';
+
+      if (total <= 0) {
+        donutChartEl.innerHTML = `<circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="var(--border)" stroke-width="6"></circle>`;
+        donutLegendEl.innerHTML = '<div class="empty" style="padding:6px 0">No expenses yet.</div>';
+        return;
+      }
+
+      const r = 15.91549430918954;
+      let svg = `<circle cx="21" cy="21" r="${r}" fill="transparent" stroke="var(--border)" stroke-width="6"></circle>`;
+      let cumulative = 0;
+
+      const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+      sortedCats.forEach(([cat, val]) => {
+        const pct = (val / total) * 100;
+        const color = CATEGORY_COLORS[cat] || '#999';
+        const offset = 25 - cumulative;
+        svg += `<circle cx="21" cy="21" r="${r}" fill="transparent" stroke="${color}" stroke-width="6" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${offset}"></circle>`;
+        cumulative += pct;
+
+        const row = document.createElement('div');
+        row.className = 'legend-item';
+        row.innerHTML = `<span class="legend-swatch" style="background:${color}"></span><span class="legend-label">${escapeHtml(cat)}</span><span class="legend-value">${fmtMoney(val, 'USD')} \u00B7 ${pct.toFixed(0)}%</span>`;
+        donutLegendEl.appendChild(row);
+      });
+
+      donutChartEl.innerHTML = svg;
+    }
+
+    function renderLineChart(byDate) {
+      const dates = Object.keys(byDate).sort();
+      if (dates.length === 0) {
+        lineChartEl.innerHTML = `<text x="150" y="72" font-size="10" fill="var(--muted)" text-anchor="middle">No expenses yet</text>`;
+        return;
+      }
+
+      const values = dates.map(d => byDate[d]);
+      const maxV = Math.max(...values, 1);
+      const w = 300, h = 140, padL = 8, padR = 8, padT = 14, padB = 24;
+      const innerW = w - padL - padR, innerH = h - padT - padB;
+      const stepX = dates.length > 1 ? innerW / (dates.length - 1) : 0;
+
+      const points = values.map((v, i) => {
+        const x = padL + (dates.length > 1 ? i * stepX : innerW / 2);
+        const y = padT + innerH - (v / maxV) * innerH;
+        return [x, y];
+      });
+
+      const lineStr = points.map(p => p.join(',')).join(' ');
+      const areaPath = `M${points[0][0]},${padT + innerH} L${points.map(p => p.join(',')).join(' L')} L${points[points.length - 1][0]},${padT + innerH} Z`;
+
+      let svg = `<path d="${areaPath}" fill="var(--accent-2)" opacity="0.15" stroke="none"></path>`;
+      svg += `<polyline points="${lineStr}" fill="none" stroke="var(--accent-2)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>`;
+      points.forEach(p => { svg += `<circle cx="${p[0]}" cy="${p[1]}" r="2.5" fill="var(--accent-2)"></circle>`; });
+
+      const labelEvery = dates.length <= 7 ? 1 : Math.ceil(dates.length / 6);
+      dates.forEach((d, i) => {
+        if (i % labelEvery !== 0 && i !== dates.length - 1) return;
+        const dObj = new Date(d + 'T12:00:00');
+        const lbl = dObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        svg += `<text x="${points[i][0]}" y="${h - 6}" font-size="8" fill="var(--muted)" text-anchor="middle">${lbl}</text>`;
+      });
+
+      lineChartEl.innerHTML = svg;
+    }
+
+    function renderSummary(entries) {
+      let totalUSD_val = 0;
+      const byCat = {};
+      const byDate = {};
+      entries.forEach(e => {
+        const usd = toUSD(e.amount, e.currency || 'EUR');
+        totalUSD_val += usd;
+        byCat[e.category] = (byCat[e.category] || 0) + usd;
+        const d = e.date || new Date(e.ts || Date.now()).toISOString().slice(0, 10);
+        byDate[d] = (byDate[d] || 0) + usd;
+      });
+      totalUSDel.textContent = fmtMoney(totalUSD_val, 'USD');
+      totalEURel.textContent = fmtMoney(totalUSD_val / EUR_TO_USD, 'EUR');
+
+      byCategoryEl.innerHTML = '';
+      Object.entries(byCat)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([cat, val]) => {
+          const pill = document.createElement('div');
+          pill.className = 'pill';
+          pill.innerHTML = `${cat}: <b>${fmtMoney(val, 'USD')}</b>`;
+          byCategoryEl.appendChild(pill);
+        });
+
+      renderDonut(byCat, totalUSD_val);
+      renderLineChart(byDate);
+    }
+
+    function render(entries) {
+      latestEntries = entries;
+      renderSummary(entries);
+      renderDetail(entries);
+    }
+
+    categoryFilterEl.addEventListener('change', () => {
+      selectedCategoryFilter = categoryFilterEl.value;
+      renderDetail(latestEntries);
+    });
+    dateFromFilterEl.addEventListener('change', () => {
+      dateFromFilter = dateFromFilterEl.value;
+      renderDetail(latestEntries);
+    });
+    dateToFilterEl.addEventListener('change', () => {
+      dateToFilter = dateToFilterEl.value;
+      renderDetail(latestEntries);
+    });
+    clearFiltersBtn.addEventListener('click', () => {
+      selectedCityFilter = 'All';
+      selectedCategoryFilter = 'All';
+      dateFromFilter = '';
+      dateToFilter = '';
+      categoryFilterEl.value = 'All';
+      dateFromFilterEl.value = '';
+      dateToFilterEl.value = '';
+      renderDetail(latestEntries);
+    });
 
     async function deleteEntry(id) {
       try {
@@ -817,13 +1151,15 @@
     const q = query(expensesCol, orderBy('ts', 'desc'), limit(1000));
     onSnapshot(q,
       (snap) => {
-        statusEl.textContent = 'Synced \u2014 live';
+        statusDot.className = 'sync-dot online';
+        statusText.textContent = 'Live';
         const entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         render(entries);
       },
       (err) => {
         console.error('snapshot error', err);
-        statusEl.textContent = 'Connection issue \u2014 check your Firebase config and internet connection';
+        statusDot.className = 'sync-dot offline';
+        statusText.textContent = 'Connection issue';
       }
     );
 
